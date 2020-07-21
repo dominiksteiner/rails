@@ -371,6 +371,7 @@ module ActionDispatch
       # Sets the cookie named +name+. The second argument may be the cookie's
       # value or a hash of options as documented above.
       def []=(name, options)
+        Rails.logger.info "------------ write cookie : #{name} : #{options}"
         if options.is_a?(Hash)
           options.symbolize_keys!
           value = options[:value]
@@ -383,6 +384,7 @@ module ActionDispatch
 
         if @cookies[name.to_s] != value || options[:expires]
           @cookies[name.to_s] = value
+          Rails.logger.info "------------ set_cookies : #{name.to_s} : #{options}"
           @set_cookies[name.to_s] = options
           @delete_cookies.delete(name.to_s)
         end
@@ -419,6 +421,7 @@ module ActionDispatch
       end
 
       def write(headers)
+        Rails.logger.info "------------ write headers"
         if header = make_set_cookie_header(headers[HTTP_HEADER])
           headers[HTTP_HEADER] = header
         end
@@ -432,10 +435,13 @@ module ActionDispatch
         end
 
         def make_set_cookie_header(header)
+          Rails.logger.info "------------ make_set_cookie_header : #{header}"
           header = @set_cookies.inject(header) { |m, (k, v)|
             if write_cookie?(v)
+              Rails.logger.info "------------ make_set_cookie_header : add_cookie_to_header : #{m} : #{k} : #{v}"
               ::Rack::Utils.add_cookie_to_header(m, k, v)
             else
+              Rails.logger.info "------------ make_set_cookie_header : not written : #{m} : #{k} : #{v}"
               m
             end
           }
@@ -650,11 +656,16 @@ module ActionDispatch
       if request.have_cookie_jar?
         cookie_jar = request.cookie_jar
         unless cookie_jar.committed?
+          Rails.logger.info "------------ call : write headers"
           cookie_jar.write(headers)
           if headers[HTTP_HEADER].respond_to?(:join)
             headers[HTTP_HEADER] = headers[HTTP_HEADER].join("\n")
           end
+        else
+          Rails.logger.info "------------ call : already commited"
         end
+      else
+        Rails.logger.info "------------ call : no cookie jar"
       end
 
       [status, headers, body]
