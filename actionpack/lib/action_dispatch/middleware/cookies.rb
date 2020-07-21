@@ -362,7 +362,7 @@ module ActionDispatch
       # Sets the cookie named +name+. The second argument may be the cookie's
       # value or a hash of options as documented above.
       def []=(name, options)
-        Rails.logger.info "[] : set cookie #{name} : #{options}"
+        Rails.logger.info "----------- [] : set cookie #{name} : #{options}"
         if options.is_a?(Hash)
           options.symbolize_keys!
           value = options[:value]
@@ -424,13 +424,13 @@ module ActionDispatch
         end
 
         def make_set_cookie_header(header)
-          Rails.logger.info "make_set_cookie_header : #{header}"
+          Rails.logger.info "------------ make_set_cookie_header : #{header}"
           header = @set_cookies.inject(header) { |m, (k, v)|
             if write_cookie?(v)
-              Rails.logger.info "make_set_cookie_header : Rack::Utils.add_cookie_to_header : #{m} : #{k} : #{v}"
+              Rails.logger.info "-------------- make_set_cookie_header : Rack::Utils.add_cookie_to_header : #{m} : #{k} : #{v}"
               ::Rack::Utils.add_cookie_to_header(m, k, v)
             else
-              Rails.logger.info "make_set_cookie_header : cookie not written : #{m} : #{k} : #{v}"
+              Rails.logger.info "-------------- make_set_cookie_header : cookie not written : #{m} : #{k} : #{v}"
               m
             end
           }
@@ -698,7 +698,11 @@ module ActionDispatch
           if headers[HTTP_HEADER].respond_to?(:join)
             headers[HTTP_HEADER] = headers[HTTP_HEADER].join("\n")
           end
+        else
+          Rails.logger.info "------------ cookies : already committed"
         end
+      else
+        Rails.logger.info "------------ cookies : no cookie jar"
       end
 
       [status, headers, body]
