@@ -656,7 +656,7 @@ module ActionDispatch
       if request.have_cookie_jar?
         cookie_jar = request.cookie_jar
         unless cookie_jar.committed?
-          Rails.logger.info "------------ call : write headers"
+          Rails.logger.info "------------ call : write headers : #{cookie_jar.inspect} : #{headers}"
           cookie_jar.write(headers)
           if headers[HTTP_HEADER].respond_to?(:join)
             headers[HTTP_HEADER] = headers[HTTP_HEADER].join("\n")
